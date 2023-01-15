@@ -1,10 +1,11 @@
-const express = require('express')
+const express = require('express') 
 const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
-require('dotenv').config()
+require('dotenv').config();
+const jwt = require('jsonwebtoken')
 
 const app = express()
-const port = process.env.PORT || 8000
+const port = process.env.PORT || 5003
 
 // middlewares
 app.use(cors())
@@ -20,7 +21,32 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const homesCollection = client.db('aircncdb').collection('homes')
+    const homeCollection = client.db('ark-AirCnC').collection('homes')
+    const userCollection = client.db('ark-AirCnC').collection('users');
+
+    //save email and generationg jwt
+    app.put('/user/:email', async (req, res)=> {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = {
+        email: email
+      }
+      const options = {
+        upsert: true
+      }
+      const updateDoc = {
+        $set: {
+          user
+        }
+      }
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      console.log(result);
+
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN)
+      console.log(token)
+      res.send({result,token})
+
+    })
 
     console.log('Database Connected...')
   } finally {

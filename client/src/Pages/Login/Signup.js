@@ -1,14 +1,19 @@
 import React, { useContext } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import PrimaryButton from "../../Components/Button/PrimaryButton";
 import { AuthContext } from "../../contexts/AuthProvider";
 import toast from "react-hot-toast";
+import SmallSpinner from "../../Components/Spinner/SmallSpinner";
+import { setAuthToken } from "../../api/auth";
 
 const Signup = () => {
-  const { createUser, updateUserProfile, verifyEmail, loading, setLoading } =
+  const { createUser, updateUserProfile, verifyEmail, loading, setLoading,signInWithGoogle } =
     useContext(AuthContext);
 
+    const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
   const handleSubmit = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -32,6 +37,7 @@ const Signup = () => {
         createUser(email, password)
           .then((res) => {
             console.log(res);
+            setAuthToken(res.user)
             updateUserProfile(name, data.data.url).then((res) => {
               verifyEmail().then(() => {
                 toast.success("Please check your email for verification link");
@@ -40,12 +46,25 @@ const Signup = () => {
           })
           .catch((err) => {
             console.log(err)
+            toast.error(err.message)
           setLoading(false)
           });
       })
       .catch((err) => console.log(err));
-    //create user
   };
+  const handleGoogle = () => {
+    signInWithGoogle()
+      .then((res) => {
+        console.log(res.user);
+        setAuthToken(res.user)
+        toast.success('Login Successfull')
+        navigate(from, {replace:true})
+      })
+      .catch(err => {
+      toast.error(err.message)
+    })
+  }
+
 
   return (
     <div className="flex justify-center items-center pt-8">
@@ -123,7 +142,7 @@ const Signup = () => {
                 type="submit"
                 classes="w-full px-8 py-3 font-semibold rounded-md bg-gray-900 hover:bg-gray-700 hover:text-white text-gray-100"
               >
-                Sign up
+                {loading ? <SmallSpinner/> : 'Sign Up'}
               </PrimaryButton>
             </div>
           </div>
@@ -136,7 +155,7 @@ const Signup = () => {
           <div className="flex-1 h-px sm:w-16 dark:bg-gray-700"></div>
         </div>
         <div className="flex justify-center space-x-4">
-          <button aria-label="Log in with Google" className="p-3 rounded-sm">
+          <button onClick={handleGoogle} aria-label="Log in with Google" className="p-3 rounded-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 32 32"

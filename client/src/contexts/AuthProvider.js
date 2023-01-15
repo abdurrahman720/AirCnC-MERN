@@ -53,7 +53,7 @@ const AuthProvider = ({ children }) => {
   // 5. Logout
   const logout = () => {
     setLoading(true)
-    localStorage.removeItem('aircnc-token')
+    localStorage.removeItem('arkAirCnC')
     return signOut(auth)
   }
 
@@ -73,6 +73,7 @@ const AuthProvider = ({ children }) => {
     //this part will execute once the component is mounted.
     const unsubscribe = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser)
+      console.log(user)
       setLoading(false)
     })
 
@@ -80,7 +81,7 @@ const AuthProvider = ({ children }) => {
       //this part will execute once the component is unmounted.
       unsubscribe()
     }
-  }, [])
+  })
 
   const authInfo = {
     user,

@@ -35,4 +35,4 @@ const HomeCard = () => {
   )
 }
 
-export default HomeCard
+export default HomeCard;
